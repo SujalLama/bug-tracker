@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const message_controller_1 = require("../controllers/message.controller");
+const authenticate_1 = require("../middleware/authenticate");
+const authorization_1 = require("../middleware/authorization");
+const router = (0, express_1.Router)();
+router.post("/", authenticate_1.authenticateUser, (0, authorization_1.authorizeRoles)("MANAGER", "ADMIN"), message_controller_1.sendMessage);
+router.get("/:projectId", message_controller_1.getMessages);
+exports.default = router;

@@ -1,0 +1,126 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================
+// User Model
+// ==============================
+model User {
+  id               String         @id @default(auto()) @map("_id") @db.ObjectId
+  username         String         @unique
+  email            String         @unique
+  password         String
+  role             Role
+  managedProjects  Project[]      @relation("ManagedProjects")
+  assignedTickets  Ticket[]       @relation("AssignedTickets")
+  comments         Comment[]
+  messages         Message[]
+  projectMembers   ProjectMember[]
+}
+
+// ==============================
+// Project Model
+// ==============================
+model Project {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  description    String?
+  status         ProjectStatus   @default(ACTIVE) // <-- new status field
+  manager        User            @relation("ManagedProjects", fields: [managerId], references: [id])
+  managerId      String          @db.ObjectId
+  tickets        Ticket[]
+  messages       Message[]
+  projectMembers ProjectMember[]
+  createdAt      DateTime        @default(now())
+}
+
+// ==============================
+// Ticket Model
+// ==============================
+model Ticket {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+  priority    Priority
+  status      TicketStatus
+  project     Project   @relation(fields: [projectId], references: [id])
+  projectId   String    @db.ObjectId
+  assignee    User?     @relation("AssignedTickets", fields: [assigneeId], references: [id])
+  assigneeId  String?   @db.ObjectId
+  comments    Comment[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ==============================
+// Comment Model
+// ==============================
+model Comment {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String   @db.ObjectId
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  ticketId  String   @db.ObjectId
+  createdAt DateTime @default(now())
+}
+
+// ==============================
+// Message Model
+// ==============================
+model Message {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  sender    User     @relation(fields: [senderId], references: [id])
+  senderId  String   @db.ObjectId
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String   @db.ObjectId
+  createdAt DateTime @default(now())
+}
+
+// ==============================
+// ProjectMember Model
+// ==============================
+model ProjectMember {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  project   Project  @relation(fields: [projectId], references: [id])
+  projectId String   @db.ObjectId
+}
+
+// ==============================
+// Enums
+// ==============================
+enum Role {
+  ADMIN
+  MANAGER
+  DEVELOPER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum ProjectStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+}
