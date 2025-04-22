@@ -7,12 +7,12 @@ import { authorizeRoles } from "../middleware/authorization"; // Import the auth
 const router = Router();
 
 // Protect routes: Authenticate the user and authorize based on role
-// router.post(
-//   "/",
-//   authenticateUser,
-//   authorizeRoles("MANAGER"), // Only managers can create projects
-//   projectController.createProject,
-// );
+router.post(
+  "/",
+  authenticateUser,
+  authorizeRoles("MANAGER"), // Only managers can create projects
+  projectController.createProject,
+);
 
 router.put(
   "/:projectId",

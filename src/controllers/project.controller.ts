@@ -1,12 +1,8 @@
 import { Request, Response } from "express";
 import * as projectService from "../services/project.service";
 import { ProjectStatus } from "@prisma/client";
-import { AuthenticatedRequest } from "../middleware/authenticate";
 
-export const createProject = async (
-  req: AuthenticatedRequest,
-  res: Response,
-) => {
+export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, description, status, memberIds } = req.body;
 
@@ -26,6 +22,7 @@ export const createProject = async (
 
     res.status(201).json(project);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Failed to create project" });
   }
 };
@@ -33,9 +30,9 @@ export const createProject = async (
 export const updateProject = async (req: Request, res: Response) => {
   try {
     const { name, description, status, memberIds } = req.body;
-    const { id } = req.params;
+    const { projectId } = req.params;
 
-    const updated = await projectService.updateProject(id, {
+    const updated = await projectService.updateProject(projectId, {
       name,
       description,
       status,
@@ -44,6 +41,7 @@ export const updateProject = async (req: Request, res: Response) => {
 
     res.json(updated);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ error: "Failed to update project" });
   }
 };

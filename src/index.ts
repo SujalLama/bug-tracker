@@ -6,6 +6,9 @@ import { Server } from "socket.io";
 import userRoutes from "./routes/user.routes";
 import projectRoutes from "./routes/project.routes";
 import messageRoutes from "./routes/message.routes";
+import ticketRoutes from "./routes/ticket.routes";
+import commentRoutes from "./routes/comment.routes";
+import "./types/express"; // Adjust path if needed
 
 dotenv.config();
 
@@ -21,6 +24,8 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/comments", commentRoutes);
 
 app.get("/", (req, res) => {
   res.send("Bug Tracker API is running...");

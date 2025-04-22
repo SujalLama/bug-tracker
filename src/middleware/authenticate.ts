@@ -1,17 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma/client";
-import { Role } from "@prisma/client";
+import { User } from "@prisma/client";
 
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: Role;
-  };
-}
 export const authenticateUser = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> => {
@@ -24,18 +17,18 @@ export const authenticateUser = async (
 
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string;
+      id: string;
     };
 
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
+      where: { id: decoded.id },
     });
+
     if (!user) {
       res.status(401).json({ message: "User not found" });
       return;
     }
-
-    req.user = user;
+    req.user = user as User;
     next(); // proceed to next middleware
   } catch (error) {
     console.error(error);
