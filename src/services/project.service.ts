@@ -91,15 +91,54 @@ export const getProjectById = async (id: string) => {
   });
 };
 
-export const getAllProjects = async () => {
-  return prisma.project.findMany({
-    include: {
-      manager: true,
-      projectMembers: {
-        include: { user: true },
+export const getAllProjects = async ({
+  pageNumber,
+  pageSize,
+  search,
+}: {
+  pageNumber: number;
+  pageSize: number;
+  search: string;
+}) => {
+  const [projects, totalCount] = await Promise.all([
+    prisma.project.findMany({
+      skip: (pageNumber - 1) * pageSize,
+      take: pageSize,
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            description: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        ],
       },
-    },
-  });
+      include: {
+        manager: true,
+        projectMembers: {
+          include: { user: true },
+        },
+      },
+    }),
+    prisma.project.count(),
+  ]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  return {
+    data: projects,
+    totalCount,
+    pageNumber,
+    pageSize,
+    totalPages,
+  };
 };
 
 export const deleteProject = async (id: string) => {

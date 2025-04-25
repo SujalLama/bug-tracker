@@ -63,7 +63,14 @@ export const getProjectById = async (
 
 export const getAllProjects = async (req: Request, res: Response) => {
   try {
-    const projects = await projectService.getAllProjects();
+    const { pageNumber = 1, pageSize = 10, search = "" } = req.query;
+
+    const projects = await projectService.getAllProjects({
+      pageNumber: Number(pageNumber),
+      pageSize: Number(pageSize),
+      search: String(search),
+    });
+
     res.json(projects);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch projects" });

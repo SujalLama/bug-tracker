@@ -5,20 +5,12 @@ import {
   updateStatus,
 } from "../controllers/ticket.controller";
 import { authenticateUser } from "../middleware/authenticate";
-import {
-  isProjectMemberOrManager,
-  isTicketAssignee,
-} from "../middleware/authorization";
+import { isProjectMemberOrManager } from "../middleware/authorization";
 
 const router = Router();
 
-router.post("/", authenticateUser, isProjectMemberOrManager, createTicket);
-router.get(
-  "/:projectId",
-  authenticateUser,
-  isProjectMemberOrManager,
-  getTickets,
-);
+router.post("/", authenticateUser, createTicket);
+router.get("/:projectId", authenticateUser, getTickets);
 
 router.patch(
   "/:ticketId/status",
